@@ -1,27 +1,15 @@
-# Create open-liberty builder
-FROM open-liberty
-LABEL maintainer "Michael cheng <mcheng@us.ibm.com>"
+FROM registry.redhat.io/codeready-workspaces/stacks-java-rhel8
 
 USER root
+WORKDIR /root
+RUN wget http://apache.spinellicreations.com/maven/maven-3/3.6.1/binaries/apache-maven-3.6.1-bin.tar.gz
+RUN gunzip apache-maven-3.6.1-bin.tar.gz
+RUN tar xvf apache-maven-3.6.1-bin.tar
+RUN cp -r apache-maven-3.6.1 /usr/share
+RUN alternatives --install /usr/bin/mvn mvn /usr/share/apache-maven-3.6.1/bin/mvn 120
+RUN alternatives --set  mvn /usr/share/apache-maven-3.6.1/bin/mvn 
 
-# Install maven and open JDK for build and other utilities
-RUN apt update
-RUN apt -y install maven
-RUN  apt-get -y install openjdk-8-jdk
-RUN apt-get -y install sudo
-RUN apt-get -y install vim
-
-
-# Remove password, and allow sudo acccess for default user.
-RUN usermod -aG sudo default
-RUN passwd -d default
-
-RUN mkdir /home/default
-RUN chown default /home/default
-
-RUN mkdir /projects
-RUN chown default /projects
-
-# Switch to default user
-USER default
+USER jboss
+ENV MAVEN_VESION=3.6.1
+ENV MAVEN_OPTS="-XX:MaxRAM=150m -XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Xmx512m -Djava.security.egd=file:/dev/./urandom"
 WORKDIR /projects
